@@ -1,0 +1,27 @@
+{
+  "name": "opus-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack",
+    "install": "webpack && cp ./dist/* ../data/",
+    "dev": "webpack serve"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "extendable-media-recorder": "^9.2.17",
+    "extendable-media-recorder-wav-encoder": "^7.0.121",
+    "opus-recorder": "^8.0.5",
+    "ringbufferjs": "^2.0.0"
+  },
+  "devDependencies": {
+    "file-loader": "^6.2.0",
+    "path": "^0.12.7",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0"
+  }
+}

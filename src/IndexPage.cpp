@@ -14,19 +14,14 @@ void IndexPage::handleRequest(AsyncWebServerRequest *request) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ESP Radio</title>
-  <script src="index.js"></script>
+  <script src="main.js"></script>
 </head>
 <body>
-<button id="btn-play" onclick="onPlayClick()">Play</button>
-)##");
-  if (auto newSsid = params.newSsid) {
-    response->printf("Failed to connect to '%s'!<br/>\n", newSsid->c_str());
-  }
-  if (!wifi.isConnected()) {
-    response->printf("Connected to '%s'!<br/>\n", params.ssid.c_str());
-  }
-  response->print("Connect to WiFi:");
-  response->print(R"(
+<audio id="audio" autoplay="autoplay" controls="controls"></audio><br/>
+<button id="btn-record">Record</button><br/>
+<button id="btn-stop">Stop</button><br/>
+<button id="btn-play">Play</button><br/>
+<h>Connect to WiFi:</h>
 <form action="connect">
   <label for="ssid">WiFi SSID:</label>
   <input type="text" name="SSID" id="ssid">
@@ -36,7 +31,13 @@ void IndexPage::handleRequest(AsyncWebServerRequest *request) {
   <br />
   <input type="submit" value="Connect">
 </form><br/><br/>
-)");
+)##");
+  if (auto newSsid = params.newSsid) {
+    response->printf("Failed to connect to '%s'!<br/>\n", newSsid->c_str());
+  }
+  if (!wifi.isConnected()) {
+    response->printf("Connected to '%s'!<br/>\n", params.ssid.c_str());
+  }
   auto ledStatus = params.ledEnabled ? "On" : "Off";
   auto pttStatus = params.pttEnabled ? "On" : "Off";
   auto ledAction = params.ledEnabled ? "off" : "on";
