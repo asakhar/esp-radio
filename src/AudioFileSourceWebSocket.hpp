@@ -2,11 +2,10 @@
 #include <AudioFileSource.h>
 #include <AudioGenerator.h>
 #include <ESPAsyncWebServer.h>
-#include <RingBuf.h>
+#include "RingBuf.hpp"
 
 class AudioFileSourceWebSocket : public AudioFileSource {
 public:
-  static constexpr size_t buffSize = 4096*2;
   AudioFileSourceWebSocket(char const *url, AudioGenerator *gen,
                            AudioOutput *out);
   virtual ~AudioFileSourceWebSocket() override;
@@ -40,7 +39,7 @@ private:
   AudioGenerator *gen;
   AudioOutput *out;
   AsyncWebSocket ws;
-  RingBuf<uint8_t, buffSize> buff;
+  RingBuf<uint8_t, 4096*4> buff;
   bool isYielding{false};
   int pos{0};
   int size{0};

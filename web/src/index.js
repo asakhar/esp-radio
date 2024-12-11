@@ -46,7 +46,7 @@ async function startRecording() {
       echoCancellation: true,
     }
   })
-  const audioContext = new AudioContext({ sampleRate: 8000 });
+  const audioContext = new AudioContext({ sampleRate: 44100 });
   const mediaStreamAudioSourceNode = new MediaStreamAudioSourceNode(audioContext, { mediaStream: stream });
   const mediaStreamAudioDestinationNode = new MediaStreamAudioDestinationNode(audioContext, { channelCount: 1 });
 
@@ -74,7 +74,7 @@ async function startRecording() {
   websocket = new WebSocket(gateway);
   websocket.binaryType = 'arraybuffer';
   websocket.onopen = () => {
-    mediaRecorder.start(1000);
+    mediaRecorder.start(10);
     // websocket.send(new ArrayBuffer([1, 2, 3, 4]));// TODO: remove
   };
   websocket.onclose = () => {
@@ -108,6 +108,8 @@ async function stopRecording() {
         capturedStream.getTracks().forEach(track => track.stop());
       }
 
+      const audio = document.querySelector('#audio')
+      audio.src = URL.createObjectURL(audioBlob);
       resolve(audioBlob);
       console.log('Closing websocket');
       websocket.close();
@@ -122,8 +124,8 @@ function playAudio(audioBlob) {
   if (audioBlob) {
     const audio = document.querySelector('#audio')
     audio.src = URL.createObjectURL(audioBlob);
-    audio.play();
   }
+  audio.play();
 }
 window.onload = async () => {
   await connectEncoder();

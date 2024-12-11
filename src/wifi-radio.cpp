@@ -1,3 +1,5 @@
+// #define AudioGeneratorWavNonBlock AudioGeneratorWAV
+// #include <AudioGeneratorWAV.h>
 #include "AudioFileSourceWebSocket.hpp"
 #include "AudioGeneratorWavNonBlock.hpp"
 #include "IndexPage.hpp"
@@ -6,10 +8,15 @@
 #include "Utils.hpp"
 #include "WiFiManager.hpp"
 #include <Arduino.h>
-#include <AudioOutputI2SNoDAC.h>
+#include <AudioOutputI2S.h>
 #include <DNSServer.h>
+#ifdef ESP32
+#include <AsyncTCP.h>
+#include <WiFi.h>
+#else
 #include <ESP8266WiFi.h>
 #include <ESPAsyncTCP.h>
+#endif
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
 
@@ -44,8 +51,8 @@ void StatusCallback(void *cbData, int code, const char *string) {
 // const char *ssid = "HUAWEI-B593-AC9B"; // your WiFi Name
 // const char *password = "5G7LE1EH7F5";  // Your Wifi Password
 Params params{
-    .newSsid = std::nullopt,
-    .newPass = std::nullopt,
+    .newSsid = "",
+    .newPass = "",
     .ssid = "Rabbit",
     .pass = "QwPoAsLk01#73",
     .apssid = "ESP8266 Radio",
@@ -61,14 +68,14 @@ Router *router;
 IndexPage *indexPage;
 
 AudioGeneratorWavNonBlock *gen;
-AudioOutputI2SNoDAC *out;
+AudioOutputI2S *out;
 AudioFileSourceWebSocket *source;
 
 void setup() {
   Serial.begin(115200);
   LittleFS.begin();
   audioLogger = &Serial;
-  out = new AudioOutputI2SNoDAC();
+  out = new AudioOutputI2S(0, AudioOutputI2S::INTERNAL_DAC);
   gen = new AudioGeneratorWavNonBlock();
   source = new AudioFileSourceWebSocket("/ws", gen, out);
 

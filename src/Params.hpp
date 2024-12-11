@@ -2,17 +2,16 @@
 #include <Arduino.h>
 #include <IPAddress.h>
 #include <memory>
-#include <optional>
 
 struct Params {
   static constexpr int ledPin = 2;
-  static constexpr int pttPin = 16;
-  std::optional<String> newSsid;
-  std::optional<String> newPass;
+  static constexpr int pttPin = 27;
+  String newSsid;
+  String newPass;
   String ssid;
   String pass;
-  String apssid = "ESP8266 Radio";
-  String appass = "QwPoAsLk01#73";
+  String apssid;
+  String appass;
   bool ledEnabled;
   bool pttEnabled;
   IPAddress localIp;

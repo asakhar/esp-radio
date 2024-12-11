@@ -17,7 +17,7 @@ void IndexPage::handleRequest(AsyncWebServerRequest *request) {
   <script src="main.js"></script>
 </head>
 <body>
-<audio id="audio" autoplay="autoplay" controls="controls"></audio><br/>
+<audio id="audio" controls="controls"></audio><br/>
 <button id="btn-record">Record</button><br/>
 <button id="btn-stop">Stop</button><br/>
 <button id="btn-play">Play</button><br/>
@@ -32,8 +32,9 @@ void IndexPage::handleRequest(AsyncWebServerRequest *request) {
   <input type="submit" value="Connect">
 </form><br/><br/>
 )##");
-  if (auto newSsid = params.newSsid) {
-    response->printf("Failed to connect to '%s'!<br/>\n", newSsid->c_str());
+  if (!params.newSsid.isEmpty()) {
+    response->printf("Failed to connect to '%s'!<br/>\n",
+                     params.newSsid.c_str());
   }
   if (!wifi.isConnected()) {
     response->printf("Connected to '%s'!<br/>\n", params.ssid.c_str());

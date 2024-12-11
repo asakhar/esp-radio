@@ -39,7 +39,7 @@ bool AudioGeneratorWavNonBlock::loop() {
   bool filled = false;
   if (!running)
     goto done; // Nothing to do here!
-  
+
   // Try and stuff the buffer one sample at a time
   do {
     if (bitsPerSample == 8) {
@@ -52,7 +52,8 @@ bool AudioGeneratorWavNonBlock::loop() {
       if (channels == 1) {
         if (!GetBufferedData(2, &lastSample[AudioOutput::LEFTCHANNEL]))
           break;
-        lastSample[AudioOutput::RIGHTCHANNEL] = 0;
+        lastSample[AudioOutput::RIGHTCHANNEL] =
+            lastSample[AudioOutput::LEFTCHANNEL];
       } else {
         // TODO
       }
@@ -61,10 +62,7 @@ bool AudioGeneratorWavNonBlock::loop() {
   } while (running && !filled);
 
 done:
-  file->loop();
-  if (filled) {
-    output->loop();
-  }
+  output->loop();
 
   return running;
 }

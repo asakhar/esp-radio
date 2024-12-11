@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AudioGenerator.h"
-#include <RingBuf.h>
+#include "RingBuf.hpp"
 
 class AudioGeneratorWavNonBlock : public AudioGenerator {
 public:

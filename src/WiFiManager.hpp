@@ -1,6 +1,10 @@
 #pragma once
 #include <Arduino.h>
+#ifdef ESP32
+#include <WiFi.h>
+#else
 #include <ESP8266WiFi.h>
+#endif
 #include <Params.hpp>
 
 class WiFiManager {
@@ -16,8 +20,12 @@ public:
     params.apIp = WiFi.softAPIP(); // IP address for AP mode
   }
   inline bool connect() {
-    auto newssid = params.newSsid.value_or(params.ssid);
-    auto newpass = params.newPass.value_or(params.pass);
+    auto newssid = params.newSsid;
+    if (newssid.isEmpty())
+      newssid = params.ssid;
+    auto newpass = params.newPass;
+    if (newpass.isEmpty())
+      newpass = params.pass;
     int attempts = 0;
     Serial.print("Connecting to ");
     Serial.println(newssid);
@@ -31,11 +39,11 @@ public:
     }
     if (params.newSsid) {
       params.ssid = newssid;
-      params.newSsid.reset();
+      params.newSsid.clear();
     }
     if (params.newPass) {
       params.pass = newpass;
-      params.newPass.reset();
+      params.newPass.clear();
     }
     Serial.println("");
     Serial.print("WiFi connected to ");

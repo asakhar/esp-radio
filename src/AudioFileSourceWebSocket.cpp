@@ -97,22 +97,19 @@ bool AudioFileSourceWebSocket::loop() {
   if (!isOpen()) {
     return true;
   }
-  // auto oldReq = requested;
   noInterrupts();
   long freeSpace = buff.bytesFreeIsr();
   auto to_request = freeSpace - requested;
-  if (to_request > (long)(buffSize / 2)) {
+  if (to_request >= 1600) {
     requested += to_request;
   } else {
     to_request = 0;
   }
   interrupts();
   if (to_request) {
-    auto requesting = String(to_request);
-    // Serial.printf("Requesting='%s', free=%ld, requestedOld=%d,
-    // requested=%d\n",
-    //               requesting.c_str(), freeSpace, oldReq, requested);
-    ws.textAll(requesting);
+    char buff[20];
+    snprintf(buff, sizeof(buff), "%ld", to_request);
+    ws.textAll(buff);
   }
   return true;
 }
