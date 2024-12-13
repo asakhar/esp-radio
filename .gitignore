@@ -1,6 +1,8 @@
 .pio
-.vscode
+.vscode/*
+!.vscode/tasks.json
 data/*
+!data/index.html
 web/dist/*
 node_modules/
 package-lock.json

@@ -29,6 +29,11 @@ void Router::handleConnect(AsyncWebServerRequest *request) {
 
 void Router::handlePin(AsyncWebServerRequest *request, bool &stateVal) {
   auto state = request->arg("state");
+  if (state.isEmpty()) {
+    request->send(200, "application/json",
+                  String("{\"state\": ") + (stateVal ? "true" : "false") + "}");
+    return;
+  }
   if (state == "on") {
     stateVal = true;
   } else if (state == "off") {
@@ -50,11 +55,20 @@ void Router::handleFree(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
+void Router::handleConnInfo(AsyncWebServerRequest *request) {
+  request->send(200, "application/json",
+                String("{\"\": ") + (wifi.isConnected() ? "true" : "false") +
+                    ",\"network\":\"" + params.ssid + "\"}");
+}
+
 void Router::handleRequest(AsyncWebServerRequest *request) {
   auto const &target = request->url();
   Serial.println(target);
   if (request->url() == "/connect") {
     return handleConnect(request);
+  }
+  if (request->url() == "/conninfo") {
+    return handleConnInfo(request);
   }
   if (request->url() == "/led") {
     return handlePin(request, params.ledEnabled);

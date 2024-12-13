@@ -1,0 +1,38 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "BuildWeb",
+      "type": "shell",
+      "command": "cd web; npm run install; cd .."
+    },
+    {
+      "type": "PlatformIO",
+      "task": "Upload Filesystem Image (esp32)",
+      "problemMatcher": [
+        "$platformio"
+      ],
+      "label": "PlatformIO: Upload Filesystem Image with Web (esp32)",
+      "dependsOn": [
+        "BuildWeb"
+      ]
+    },
+    {
+      "type": "PlatformIO",
+      "task": "Upload (esp32)",
+      "problemMatcher": [
+        "$platformio"
+      ],
+      "label": "PlatformIO: Upload with Web (esp32)",
+      "dependsOn": [
+        "PlatformIO: Upload Filesystem Image with Web (esp32)"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

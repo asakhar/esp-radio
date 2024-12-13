@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ESP Radio</title>
+  <script src="main.js"></script>
+</head>
+
+<body>
+  <h>Connected to 'Network'!</h><br />
+  <audio id="audio" controls="controls"></audio><br />
+  <button id="btn-record">Record</button><br />
+  <button id="btn-stop">Stop</button><br />
+  <button id="btn-play">Play</button><br />
+  <h>Connect to WiFi:</h>
+  <form action="connect">
+    <label for="ssid">WiFi SSID:</label>
+    <input type="text" name="SSID" id="ssid">
+    <br />
+    <label for="pass">WiFi password:</label>
+    <input type="password" name="PASS" id="pass">
+    <br />
+    <input type="submit" value="Connect">
+  </form><br /><br />
+  <a href="/led?state=toggle">Toggle LED</a><br />
+  <a href="/ptt?state=toggle">Toggle PTT</a><br />
+</body>
+
+</html>

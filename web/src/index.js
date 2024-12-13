@@ -7,13 +7,10 @@ const gateway = `ws://${window.location.hostname}/ws`;
  * @type MediaRecorder
  */
 let mediaRecorder = null;
-let audioBlobs = [];
 /**
  * @type RingBuffer<number>
  */
 let sendBuffer = new RingBuffer(100000);
-let capturedStream = null;
-let wavAudioBlob = null;
 let requested = 0;
 /**
  * @type WebSocket
@@ -44,26 +41,28 @@ async function startRecording() {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       echoCancellation: true,
-    }
-  })
-  const audioContext = new AudioContext({ sampleRate: 44100 });
-  const mediaStreamAudioSourceNode = new MediaStreamAudioSourceNode(audioContext, { mediaStream: stream });
-  const mediaStreamAudioDestinationNode = new MediaStreamAudioDestinationNode(audioContext, { channelCount: 1 });
+    },
+    video: false
+  });
 
-  mediaStreamAudioSourceNode.connect(mediaStreamAudioDestinationNode);
+  const sampleRate = 44100;
 
-  audioBlobs = [];
-  capturedStream = stream;
+  const audioContext = new AudioContext({ sampleRate });
+  const audioStreamSource = audioContext.createMediaStreamSource(stream);
+  const mediaStreamAudioDestinationNode = audioContext.createMediaStreamDestination();
+  mediaStreamAudioDestinationNode.channelCount = 1;
+  audioStreamSource.connect(mediaStreamAudioDestinationNode);
 
   // Use the extended MediaRecorder library
   mediaRecorder = new MediaRecorder(mediaStreamAudioDestinationNode.stream, {
-    mimeType: 'audio/wav'
+    mimeType: 'audio/wav',
+    audioBitsPerSecond: sampleRate * 16,
   });
 
   // Add audio blobs while recording 
   mediaRecorder.addEventListener('dataavailable', async (event) => {
-    console.log(event.data);
-    audioBlobs.push(event.data);
+    // console.log(event.data);
+    // audioBlobs.push(event.data);
     const newData = new Uint8Array(await event.data.arrayBuffer());
     for (let i of newData.values()) {
       sendBuffer.enq(i);
@@ -93,43 +92,29 @@ async function startRecording() {
   };
 }
 
-async function stopRecording() {
-  new Promise(resolve => {
-    if (!mediaRecorder) {
-      resolve(null);
-      return;
-    }
-
-    mediaRecorder.addEventListener('stop', () => {
-      const mimeType = mediaRecorder.mimeType;
-      const audioBlob = new Blob(audioBlobs, { type: mimeType });
-
-      if (capturedStream) {
-        capturedStream.getTracks().forEach(track => track.stop());
-      }
-
-      const audio = document.querySelector('#audio')
-      audio.src = URL.createObjectURL(audioBlob);
-      resolve(audioBlob);
-      console.log('Closing websocket');
-      websocket.close();
-      requested = 0;
-    });
-
-    mediaRecorder.stop();
-  });
-}
-
-function playAudio(audioBlob) {
-  if (audioBlob) {
-    const audio = document.querySelector('#audio')
-    audio.src = URL.createObjectURL(audioBlob);
+function stopRecording() {
+  if (!mediaRecorder) {
+    return;
   }
-  audio.play();
+  mediaRecorder.addEventListener('stop', () => {
+    console.log('Closing websocket');
+    requested = 0;
+    websocket.close();
+  });
+  mediaRecorder.stop();
 }
+
+// function playAudio(audioBlob) {
+//   if (audioBlob) {
+//     const audio = document.querySelector('#audio')
+//     audio.src = URL.createObjectURL(audioBlob);
+//   }
+//   audio.play();
+// }
+
 window.onload = async () => {
   await connectEncoder();
   document.querySelector('#btn-record').addEventListener('click', startRecording);
-  document.querySelector('#btn-stop').addEventListener('click', async () => { wavAudioBlob = await stopRecording(); });
-  document.querySelector('#btn-play').addEventListener('click', () => { playAudio(wavAudioBlob); });
+  document.querySelector('#btn-stop').addEventListener('click', stopRecording);
+  // document.querySelector('#btn-play').addEventListener('click', () => { playAudio(wavAudioBlob); });
 }

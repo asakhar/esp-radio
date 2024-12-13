@@ -14,6 +14,7 @@ public:
   }
 
   void handleConnect(AsyncWebServerRequest *request);
+  void handleConnInfo(AsyncWebServerRequest *request);
   void handlePin(AsyncWebServerRequest *request, bool &stateVal);
   void handleFree(AsyncWebServerRequest *request);
   void handleRequest(AsyncWebServerRequest *request) override;
