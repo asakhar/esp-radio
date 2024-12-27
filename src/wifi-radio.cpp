@@ -1,4 +1,3 @@
-#include "AudioWebSocketStream.hpp"
 #include "Params.hpp"
 #include "Router.hpp"
 #include "WiFiManager.hpp"
@@ -14,6 +13,7 @@
 #include <AudioTools.h>
 #include <ESPAsyncWebServer.h>
 #include <LittleFS.h>
+#include <AudioTools/Communication/UDPStream.h>
 
 // const char *ssid = "HUAWEI-B593-AC9B"; // your WiFi Name
 // const char *password = "5G7LE1EH7F5";  // Your Wifi Password
@@ -32,15 +32,26 @@ DNSServer dnsServer;
 AsyncWebServer server(80);
 WiFiManager *wifi;
 Router *router;
-AudioInfo info(44100, 1, 16);
+AudioInfo info(20000, 1, 16);
 AnalogAudioStream out;
-EncodedAudioStream dec(&out, new WAVDecoder());
-AudioWebSocketStream source("/ws");
+// AnalogAudioStream input;
+UDPStream source;
+// UDPStream drain;
 
-StreamCopy copier(dec, source);
+#if 0
+// SineWaveGenerator<int16_t> sineWave( 32000);  // subclass of SoundGenerator with max amplitude of 32000
+// GeneratedSoundStream<int16_t> sound( sineWave);  // Stream generated from sine wave
+// Throttle throttle(drain);
+// StreamCopy inCopier(throttle, sound);
+#endif
 
-void setup() {
+StreamCopy outCopier(out, source);
+// StreamCopy inCopier(drain, input);
+
+void setup()
+{
   Serial.begin(115200);
+  // AudioToolsLogger.begin(Serial, AudioToolsLogLevel::Info); // Warning, Info, Error, Debug
   LittleFS.begin();
 
   params.setup();
@@ -50,7 +61,8 @@ void setup() {
   wifi = new WiFiManager(params);
   router = new Router(params, *wifi);
 
-  if (dnsServer.start(53, "esp-radio.lan", params.apIp)) {
+  if (dnsServer.start(53, "esp-radio.lan", params.apIp))
+  {
     Serial.printf("DNS started: http://esp-radio.lan\n");
   }
 
@@ -59,31 +71,57 @@ void setup() {
   Serial.println("Server started");
   Serial.print("Use this URL to connect: ");
   Serial.printf("http://%s/\n", params.apIp.toString().c_str());
-  if (wifi->isConnected()) {
+  if (wifi->isConnected())
+  {
     Serial.println("or:");
     Serial.printf("http://%s/\n", params.localIp.toString().c_str());
   }
 
-  server.addHandler(source.getWs());
   server.serveStatic("/main.js", LittleFS, "/main.js");
   server.serveStatic("/index.html", LittleFS, "/index.html");
-  server.on("/", [](AsyncWebServerRequest *request) {
+  server.on("/", [](AsyncWebServerRequest *request)
+            {
     request->redirect("/index.html");
-    return;
-  });
+    return; });
   server.addHandler(router);
 
   server.begin();
+  source.begin(9000);
+  // drain.begin(IPAddress(192, 168, 1, 136), 9000);
 
   auto config = out.defaultConfig(TX_MODE);
-  config.copyFrom(info); 
+  config.copyFrom(info);
   out.begin(config);
-  dec.begin();
+
+  // auto adcConfig = input.defaultConfig(RX_MODE);
+  // adcConfig.sample_rate = 8000;
+  // adcConfig.channels = 1;
+  // input.begin(adcConfig);
+
+  // config.rx_tx_mode = RX_MODE;
+  // config.bits_per_sample = 9;
+  // config.adc_bit_width = 12;
+  // config.adc_calibration_active = true;
+  // config.is_auto_center_read = false;
+  // config.adc_attenuation = ADC_ATTEN_DB_12;
+  // config.channels = 1;
+  // config.adc_channels[0] = ADC_CHANNEL_4;
+
+#if 0
+  sineWave.begin(info, N_B4);
+
+  // Define Throttle
+  auto cfg = throttle.defaultConfig();
+  cfg.copyFrom(info);
+  // cfg.correction_us = 100000;
+  throttle.begin(cfg);
+#endif
 }
 
-void loop() {
+void loop()
+{
   dnsServer.processNextRequest();
-  source.loop();
-  copier.copy();
+  outCopier.copy();
+  // inCopier.copy();
   params.loop();
 }

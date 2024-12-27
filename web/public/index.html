@@ -4,15 +4,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <script src="main.js"></script>=
+  <title>ESP Radio</title>
+  <script src="main.js"></script>
 </head>
 
 <body>
-  <audio id="audio" controls="controls"></audio>
-  <button id="btn-record">Record</button>
-  <button id="btn-stop">Stop</button>
-  <button id="btn-play">Play</button>
+  <h>Connected to 'Network'!</h><br />
+  <audio id="audio" controls="controls"></audio><br />
+  <button id="btn-record">Record</button><br />
+  <button id="btn-record-http">Record HTTP</button><br />
+  <button id="btn-stop">Stop</button><br />
+  <button id="btn-play">Play</button><br />
+  <h>Connect to WiFi:</h>
   <form action="connect">
     <label for="ssid">WiFi SSID:</label>
     <input type="text" name="SSID" id="ssid">
@@ -21,7 +24,9 @@
     <input type="password" name="PASS" id="pass">
     <br />
     <input type="submit" value="Connect">
-  </form>
+  </form><br /><br />
+  <button id="toggle-led">Toggle LED</button>
+  <button id="toggle-ptt">Toggle PTT</button>
 </body>
 
 </html>

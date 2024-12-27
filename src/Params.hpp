@@ -28,6 +28,6 @@ struct Params {
     digitalWrite(pttPin, pttValue());
   }
 
-  inline uint8_t ledValue() const { return ledEnabled ? LOW : HIGH; }
+  inline uint8_t ledValue() const { return ledEnabled ? HIGH : LOW; }
   inline uint8_t pttValue() const { return pttEnabled ? LOW : HIGH; }
 };

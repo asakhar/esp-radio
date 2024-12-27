@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
-    "install": "webpack && cp ./dist/* ../data/",
+    "install": "webpack && cp ./dist/* ../data/ && cp ./public/* ../data/",
     "dev": "webpack serve"
   },
   "author": "",
