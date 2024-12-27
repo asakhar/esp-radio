@@ -26,6 +26,8 @@ Params params{
     .appass = "QwPoAsLk01#73",
     .ledEnabled = true,
     .pttEnabled = false,
+    .dirChange = false,
+    .audioRunning = false,
 };
 
 DNSServer dnsServer;
@@ -33,20 +35,18 @@ AsyncWebServer server(80);
 WiFiManager *wifi;
 Router *router;
 AudioInfo info(20000, 1, 16);
-AnalogAudioStream out;
-// AnalogAudioStream input;
-UDPStream source;
-// UDPStream drain;
+AnalogAudioStream audio;
+UDPStream remote;
 
 #if 0
-// SineWaveGenerator<int16_t> sineWave( 32000);  // subclass of SoundGenerator with max amplitude of 32000
-// GeneratedSoundStream<int16_t> sound( sineWave);  // Stream generated from sine wave
-// Throttle throttle(drain);
-// StreamCopy inCopier(throttle, sound);
+SineWaveGenerator<int16_t> sineWave( 32000);  // subclass of SoundGenerator with max amplitude of 32000
+GeneratedSoundStream<int16_t> sound( sineWave);  // Stream generated from sine wave
+Throttle throttle(drain);
+StreamCopy inCopier(throttle, sound);
 #endif
 
-StreamCopy outCopier(out, source);
-// StreamCopy inCopier(drain, input);
+StreamCopy outCopier(audio, remote);
+StreamCopy inCopier(remote, audio);
 
 void setup()
 {
@@ -86,26 +86,28 @@ void setup()
   server.addHandler(router);
 
   server.begin();
-  source.begin(9000);
-  // drain.begin(IPAddress(192, 168, 1, 136), 9000);
 
-  auto config = out.defaultConfig(TX_MODE);
+  AnalogConfig config;
+  if (params.pttEnabled)
+  {
+    remote.begin(9000);
+    config = audio.defaultConfig(TX_MODE);
+  }
+  else
+  {
+    remote.begin(params.receiverIp, params.receiverPort);
+    config = audio.defaultConfig(RX_MODE);
+  }
   config.copyFrom(info);
-  out.begin(config);
-
-  // auto adcConfig = input.defaultConfig(RX_MODE);
-  // adcConfig.sample_rate = 8000;
-  // adcConfig.channels = 1;
-  // input.begin(adcConfig);
-
-  // config.rx_tx_mode = RX_MODE;
-  // config.bits_per_sample = 9;
-  // config.adc_bit_width = 12;
-  // config.adc_calibration_active = true;
-  // config.is_auto_center_read = false;
-  // config.adc_attenuation = ADC_ATTEN_DB_12;
-  // config.channels = 1;
-  // config.adc_channels[0] = ADC_CHANNEL_4;
+  config.uninstall_driver_on_end = true;
+  if (audio.begin(config))
+  {
+    params.audioRunning = true;
+  }
+  else
+  {
+    Serial.println("Failed to start audio capture!");
+  }
 
 #if 0
   sineWave.begin(info, N_B4);
@@ -121,7 +123,45 @@ void setup()
 void loop()
 {
   dnsServer.processNextRequest();
-  outCopier.copy();
-  // inCopier.copy();
+  if (params.audioRunning)
+  {
+    if (params.pttEnabled)
+    {
+      outCopier.copy();
+    }
+    else
+    {
+      inCopier.copy();
+    }
+  }
+  if (params.dirChange)
+  {
+    AnalogConfig config;
+    audio.end();
+    remote.end();
+    if (params.pttEnabled)
+    {
+      remote.begin(9000);
+      config = audio.defaultConfig(TX_MODE);
+    }
+    else
+    {
+      remote.begin(params.receiverIp, params.receiverPort);
+      config = audio.defaultConfig(RX_MODE);
+    }
+    config.copyFrom(info);
+    config.uninstall_driver_on_end = true;
+    if (audio.begin(config))
+    {
+      params.audioRunning = true;
+      params.dirChange = false;
+    }
+    else
+    {
+      Serial.println("Failed to change rx/tx mode!");
+      params.audioRunning = false;
+    }
+    delay(100);
+  }
   params.loop();
 }

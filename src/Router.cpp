@@ -1,14 +1,17 @@
 #include "Router.hpp"
 
-void Router::handleConnect(AsyncWebServerRequest *request) {
+void Router::handleConnect(AsyncWebServerRequest *request)
+{
   auto newSsid = request->arg("SSID");
   auto newPass = request->arg("PASS");
-  if (newSsid.isEmpty() || newPass.isEmpty()) {
+  if (newSsid.isEmpty() || newPass.isEmpty())
+  {
     Serial.println("Invalid request!");
     request->send(400, "text/html", "Bad request");
     return;
   }
-  if (newSsid == params.ssid && WiFi.status() == WL_CONNECTED) {
+  if (newSsid == params.ssid && WiFi.status() == WL_CONNECTED)
+  {
     Serial.println("Already connected to this AP!");
     return;
   }
@@ -17,7 +20,8 @@ void Router::handleConnect(AsyncWebServerRequest *request) {
   Serial.printf("PASS=%s\n", newPass.c_str());
   params.newSsid = newSsid;
   params.newPass = newPass;
-  if (!wifi.connect()) {
+  if (!wifi.connect())
+  {
     Serial.printf("Attempting to connect to previous WiFi network: %s\n",
                   params.ssid.c_str());
     request->send(401, "text/html", "Unauthorized");
@@ -27,27 +31,37 @@ void Router::handleConnect(AsyncWebServerRequest *request) {
   request->redirect("https://" + params.localIp.toString());
 }
 
-void Router::handlePin(AsyncWebServerRequest *request, bool &stateVal) {
+void Router::handlePin(AsyncWebServerRequest *request, bool &stateVal)
+{
   auto state = request->arg("state");
-  if (state.isEmpty()) {
+  if (state.isEmpty())
+  {
     request->send(200, "application/json",
                   String("{\"state\": ") + (stateVal ? "true" : "false") + "}");
     return;
   }
-  if (state == "on") {
+  if (state == "on")
+  {
     stateVal = true;
-  } else if (state == "off") {
+  }
+  else if (state == "off")
+  {
     stateVal = false;
-  } else if (state == "toggle") {
+  }
+  else if (state == "toggle")
+  {
     stateVal = !stateVal;
-  } else {
+  }
+  else
+  {
     request->send(400, "text/plain", "Bad Request");
     return;
   }
   request->redirect("/");
 }
 
-void Router::handleFree(AsyncWebServerRequest *request) {
+void Router::handleFree(AsyncWebServerRequest *request)
+{
   AsyncResponseStream *response = request->beginResponseStream("text/html", 50);
   auto freeHeap = ESP.getFreeHeap();
   response->printf("Avaliable heap: %u\n", freeHeap);
@@ -55,28 +69,37 @@ void Router::handleFree(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
-void Router::handleConnInfo(AsyncWebServerRequest *request) {
+void Router::handleConnInfo(AsyncWebServerRequest *request)
+{
   request->send(200, "application/json",
                 String("{\"\": ") + (wifi.isConnected() ? "true" : "false") +
                     ",\"network\":\"" + params.ssid + "\"}");
 }
 
-void Router::handleRequest(AsyncWebServerRequest *request) {
+void Router::handleRequest(AsyncWebServerRequest *request)
+{
   auto const &target = request->url();
   Serial.println(target);
-  if (request->url() == "/connect") {
+  if (request->url() == "/connect")
+  {
     return handleConnect(request);
   }
-  if (request->url() == "/conninfo") {
+  if (request->url() == "/conninfo")
+  {
     return handleConnInfo(request);
   }
-  if (request->url() == "/led") {
+  if (request->url() == "/led")
+  {
     return handlePin(request, params.ledEnabled);
   }
-  if (request->url() == "/ptt") {
-    return handlePin(request, params.pttEnabled);
+  if (request->url() == "/ptt")
+  {
+    handlePin(request, params.pttEnabled);
+    params.dirChange = true;
+    return;
   }
-  if (request->url() == "/free") {
+  if (request->url() == "/free")
+  {
     return handleFree(request);
   }
   AsyncResponseStream *response = request->beginResponseStream("text/html");

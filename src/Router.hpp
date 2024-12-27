@@ -3,13 +3,15 @@
 #include "WiFiManager.hpp"
 #include <ESPAsyncWebServer.h>
 
-class Router : public AsyncWebHandler {
+class Router : public AsyncWebHandler
+{
 public:
   inline Router(Params &params, WiFiManager &wifi)
       : params{params}, wifi{wifi} {}
   virtual ~Router() = default;
 
-  inline bool canHandle(AsyncWebServerRequest *request) override {
+  inline bool canHandle(AsyncWebServerRequest *request) override
+  {
     return true;
   }
 

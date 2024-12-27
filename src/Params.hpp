@@ -3,9 +3,12 @@
 #include <IPAddress.h>
 #include <memory>
 
-struct Params {
+struct Params
+{
   static constexpr int ledPin = 2;
   static constexpr int pttPin = 27;
+  static const IPAddress receiverIp;
+  static constexpr uint16_t receiverPort{9000};
   String newSsid;
   String newPass;
   String ssid;
@@ -16,14 +19,18 @@ struct Params {
   bool pttEnabled;
   IPAddress localIp;
   IPAddress apIp;
+  volatile bool dirChange;
+  bool audioRunning;
 
-  inline void setup() const {
+  inline void setup() const
+  {
     pinMode(ledPin, OUTPUT);
     pinMode(pttPin, OUTPUT);
     loop();
   }
 
-  inline void loop() const {
+  inline void loop() const
+  {
     digitalWrite(ledPin, ledValue());
     digitalWrite(pttPin, pttValue());
   }
