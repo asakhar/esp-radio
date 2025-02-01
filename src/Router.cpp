@@ -76,6 +76,13 @@ void Router::handleConnInfo(AsyncWebServerRequest *request)
                     ",\"network\":\"" + params.ssid + "\"}");
 }
 
+void Router::handleConnectAudio(AsyncWebServerRequest *request)
+{
+  params.remoteIp = request->client()->remoteIP();
+  params.dirChange = true;
+  request->send(200);
+}
+
 void Router::handleRequest(AsyncWebServerRequest *request)
 {
   auto const &target = request->url();
@@ -101,6 +108,9 @@ void Router::handleRequest(AsyncWebServerRequest *request)
   if (request->url() == "/free")
   {
     return handleFree(request);
+  }
+  if (request->url() == "/connectAudio") {
+    return handleConnectAudio(request);
   }
   AsyncResponseStream *response = request->beginResponseStream("text/html");
   response->print("<!DOCTYPE html><html><head><title>ESP "
