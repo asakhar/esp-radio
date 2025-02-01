@@ -3,12 +3,17 @@
 #include <IPAddress.h>
 #include <memory>
 
+enum AudioState {
+  IDLE,
+  RECORDING,
+  PLAYING
+};
+
 struct Params
 {
   static constexpr int ledPin = 2;
-  static constexpr int pttPin = 27;
-  static const IPAddress receiverIp;
-  static constexpr uint16_t receiverPort{9000};
+  static constexpr int pttPin = 17;
+  static constexpr uint16_t remotePort{9000};
   String newSsid;
   String newPass;
   String ssid;
@@ -19,8 +24,9 @@ struct Params
   bool pttEnabled;
   IPAddress localIp;
   IPAddress apIp;
+  IPAddress remoteIp;
   volatile bool dirChange;
-  bool audioRunning;
+  AudioState audioState;
 
   inline void setup() const
   {

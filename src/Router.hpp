@@ -19,6 +19,7 @@ public:
   void handleConnInfo(AsyncWebServerRequest *request);
   void handlePin(AsyncWebServerRequest *request, bool &stateVal);
   void handleFree(AsyncWebServerRequest *request);
+  void handleConnectAudio(AsyncWebServerRequest *request);
   void handleRequest(AsyncWebServerRequest *request) override;
 
 private:
